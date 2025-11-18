@@ -1,23 +1,51 @@
-import { Heart } from "lucide-react";
+import { Heart, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const Home = () => {
   const [daysCount, setDaysCount] = useState(0);
+  const [timeDetails, setTimeDetails] = useState({
+    years: 0,
+    months: 0,
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0
+  });
   
   // Example start date - in a real app this would come from a database
   const startDate = new Date("2024-01-14");
   
   useEffect(() => {
-    const calculateDays = () => {
-      const today = new Date();
-      const diffTime = Math.abs(today.getTime() - startDate.getTime());
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      setDaysCount(diffDays);
+    const calculateTime = () => {
+      const now = new Date();
+      const diffTime = now.getTime() - startDate.getTime();
+      
+      // Calculate days
+      const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      setDaysCount(totalDays);
+      
+      // Calculate detailed time
+      const years = Math.floor(totalDays / 365);
+      const months = Math.floor((totalDays % 365) / 30);
+      const days = Math.floor((totalDays % 365) % 30);
+      
+      const hours = now.getHours() - startDate.getHours();
+      const minutes = now.getMinutes() - startDate.getMinutes();
+      const seconds = now.getSeconds() - startDate.getSeconds();
+      
+      setTimeDetails({
+        years,
+        months,
+        days,
+        hours: hours >= 0 ? hours : hours + 24,
+        minutes: minutes >= 0 ? minutes : minutes + 60,
+        seconds: seconds >= 0 ? seconds : seconds + 60
+      });
     };
     
-    calculateDays();
-    // Update daily
-    const interval = setInterval(calculateDays, 1000 * 60 * 60);
+    calculateTime();
+    // Update every second
+    const interval = setInterval(calculateTime, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -71,9 +99,49 @@ const Home = () => {
               </p>
               <div className="absolute inset-0 blur-2xl opacity-30 bg-primary -z-10" />
             </div>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-lg mb-6">
               {daysCount === 1 ? 'day' : 'days'}
             </p>
+            
+            {/* Detailed Time Counter */}
+            <div className="grid grid-cols-6 gap-2 mt-6 mb-6">
+              <div className="bg-background/50 rounded-xl p-3">
+                <p className="text-2xl font-bold text-primary">{timeDetails.years}</p>
+                <p className="text-xs text-muted-foreground">Years</p>
+              </div>
+              <div className="bg-background/50 rounded-xl p-3">
+                <p className="text-2xl font-bold text-primary">{timeDetails.months}</p>
+                <p className="text-xs text-muted-foreground">Months</p>
+              </div>
+              <div className="bg-background/50 rounded-xl p-3">
+                <p className="text-2xl font-bold text-primary">{timeDetails.days}</p>
+                <p className="text-xs text-muted-foreground">Days</p>
+              </div>
+              <div className="bg-background/50 rounded-xl p-3">
+                <p className="text-2xl font-bold text-primary">{timeDetails.hours}</p>
+                <p className="text-xs text-muted-foreground">Hours</p>
+              </div>
+              <div className="bg-background/50 rounded-xl p-3">
+                <p className="text-2xl font-bold text-primary">{timeDetails.minutes}</p>
+                <p className="text-xs text-muted-foreground">Mins</p>
+              </div>
+              <div className="bg-background/50 rounded-xl p-3">
+                <p className="text-2xl font-bold text-primary">{timeDetails.seconds}</p>
+                <p className="text-xs text-muted-foreground">Secs</p>
+              </div>
+            </div>
+            
+            {/* Start Date Display */}
+            <div className="flex items-center justify-center gap-2 text-muted-foreground mt-4">
+              <Calendar className="w-4 h-4" />
+              <p className="text-sm">
+                Since {startDate.toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </p>
+            </div>
           </div>
         </div>
 
