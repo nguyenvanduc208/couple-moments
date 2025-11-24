@@ -90,7 +90,7 @@ const DiaryDetailDialog = ({ entry, isOpen, onClose, onAddComment }: DiaryDetail
           <div className="space-y-4">
             {entry.images.length > 0 && (
               <div className="relative">
-                <div className="relative aspect-square bg-black rounded-2xl overflow-hidden">
+                <div className="relative aspect-square bg-secondary/30 rounded-2xl overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <img
                       src={entry.images[currentImageIndex]}
