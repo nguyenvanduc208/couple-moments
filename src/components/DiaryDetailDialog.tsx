@@ -90,7 +90,7 @@ const DiaryDetailDialog = ({ entry, isOpen, onClose, onAddComment }: DiaryDetail
           <div className="space-y-4">
             {entry.images.length > 0 && (
               <div className="relative">
-                <div className="relative aspect-square bg-secondary/30 rounded-2xl overflow-hidden">
+                <div className="relative aspect-square bg-muted/30 rounded-xl overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <img
                       src={entry.images[currentImageIndex]}
@@ -145,13 +145,13 @@ const DiaryDetailDialog = ({ entry, isOpen, onClose, onAddComment }: DiaryDetail
             </div>
 
             {/* Comments Section */}
-            <div className="border-t border-border pt-4 flex-1 flex flex-col min-h-0">
+            <div className="border-t border-border/50 pt-4 flex-1 flex flex-col min-h-0">
               <h4 className="font-semibold mb-3">Comments ({entry.comments.length})</h4>
               
               <ScrollArea ref={scrollAreaRef} className="flex-1 pr-4 mb-4">
                 <div className="space-y-3">
                   {entry.comments.map((comment, idx) => (
-                    <div key={idx} className="bg-secondary/30 rounded-xl p-3">
+                    <div key={idx} className="bg-muted/50 rounded-lg p-3">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium text-foreground">{comment.author}</span>
                         <span className="text-xs text-muted-foreground">
@@ -165,7 +165,7 @@ const DiaryDetailDialog = ({ entry, isOpen, onClose, onAddComment }: DiaryDetail
               </ScrollArea>
 
               {/* Add Comment Input */}
-              <div className="flex gap-2 pt-2 border-t border-border">
+              <div className="flex gap-2 pt-2 border-t border-border/50">
                 <Input
                   placeholder="Add a comment..."
                   value={newComment}
