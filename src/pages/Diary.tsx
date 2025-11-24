@@ -183,7 +183,7 @@ const Diary = () => {
       />
 
       <DiaryDetailDialog
-        entry={detailEntry}
+        entry={detailEntry ? entries.find(e => e.id === detailEntry.id) || detailEntry : null}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         onAddComment={handleAddComment}

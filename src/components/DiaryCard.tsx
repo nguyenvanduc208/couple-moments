@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { useState, useRef, useEffect } from "react";
 
 interface Comment {
@@ -75,14 +76,20 @@ const DiaryCard = ({ entry, index, onAddComment, onOpenDetail }: DiaryCardProps)
     >
       {/* Images Gallery - Show max 2 images + count */}
       {entry.images.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 p-2">
+        <div className={cn(
+          "gap-2 p-2",
+          entry.images.length === 1 ? "flex" : "grid grid-cols-2"
+        )}>
           {entry.images.slice(0, 2).map((image, idx) => (
             <div 
               key={idx} 
-              className="relative overflow-hidden rounded-2xl aspect-square bg-secondary cursor-pointer"
+              className={cn(
+                "relative overflow-hidden rounded-2xl aspect-square bg-secondary/30 cursor-pointer",
+                entry.images.length === 1 && "w-full"
+              )}
               onClick={() => onOpenDetail(entry)}
             >
-              <div className="absolute inset-0 flex items-center justify-center bg-black">
+              <div className="absolute inset-0 flex items-center justify-center bg-secondary/30">
                 <img
                   src={image}
                   alt={`Memory ${idx + 1}`}
@@ -90,8 +97,8 @@ const DiaryCard = ({ entry, index, onAddComment, onOpenDetail }: DiaryCardProps)
                 />
               </div>
               {idx === 1 && entry.images.length > 2 && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <span className="text-white text-3xl font-bold">+{entry.images.length - 2}</span>
+                <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                  <span className="text-foreground text-3xl font-bold">+{entry.images.length - 2}</span>
                 </div>
               )}
             </div>
