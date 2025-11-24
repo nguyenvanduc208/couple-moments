@@ -71,7 +71,7 @@ const DiaryCard = ({ entry, index, onAddComment, onOpenDetail }: DiaryCardProps)
 
   return (
     <Card 
-      className="overflow-hidden bg-secondary/30 border-0 shadow-card hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+      className="overflow-hidden bg-card border border-border/50 shadow-sm hover:shadow-md transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
       style={{ animationDelay: `${index * 100}ms` }}
     >
       {/* Images Gallery - Show max 2 images + count */}
@@ -84,12 +84,12 @@ const DiaryCard = ({ entry, index, onAddComment, onOpenDetail }: DiaryCardProps)
             <div 
               key={idx} 
               className={cn(
-                "relative overflow-hidden rounded-2xl aspect-square bg-secondary/30 cursor-pointer",
+                "relative overflow-hidden rounded-xl aspect-square bg-muted/30 cursor-pointer",
                 entry.images.length === 1 && "w-full"
               )}
               onClick={() => onOpenDetail(entry)}
             >
-              <div className="absolute inset-0 flex items-center justify-center bg-secondary/30">
+              <div className="absolute inset-0 flex items-center justify-center bg-muted/30">
                 <img
                   src={image}
                   alt={`Memory ${idx + 1}`}
@@ -129,12 +129,12 @@ const DiaryCard = ({ entry, index, onAddComment, onOpenDetail }: DiaryCardProps)
 
         {/* Comments Section */}
         {entry.comments.length > 0 && (
-          <div className="border-t border-border pt-4">
+          <div className="border-t border-border/50 pt-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowComments(!showComments)}
-              className="w-full mb-2 text-muted-foreground hover:text-foreground"
+              className="w-full mb-2 text-muted-foreground hover:text-foreground hover:bg-transparent"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               {showComments ? 'Hide' : 'Show'} {entry.comments.length} {entry.comments.length === 1 ? 'comment' : 'comments'}
@@ -145,7 +145,7 @@ const DiaryCard = ({ entry, index, onAddComment, onOpenDetail }: DiaryCardProps)
               <ScrollArea ref={scrollAreaRef} className="h-[200px] pr-4">
                 <div className="space-y-3">
                   {entry.comments.map((comment, idx) => (
-                    <div key={idx} className="bg-background/50 rounded-xl p-3">
+                    <div key={idx} className="bg-muted/50 rounded-lg p-3">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-medium text-foreground">{comment.author}</span>
                         <span className="text-xs text-muted-foreground">
@@ -162,7 +162,7 @@ const DiaryCard = ({ entry, index, onAddComment, onOpenDetail }: DiaryCardProps)
         )}
 
         {/* Add Comment Input */}
-        <div className="border-t border-border pt-4 mt-4">
+        <div className="border-t border-border/50 pt-4 mt-4">
           <div className="flex gap-2">
             <Input
               placeholder="Add a comment..."
