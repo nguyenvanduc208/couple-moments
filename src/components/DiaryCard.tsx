@@ -1,6 +1,9 @@
-import { Calendar, MessageCircle, User } from "lucide-react";
+import { Calendar, MessageCircle, User, Send, ChevronDown } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useRef, useEffect } from "react";
 
 interface Comment {
   author: string;
@@ -21,32 +24,76 @@ interface DiaryEntry {
 interface DiaryCardProps {
   entry: DiaryEntry;
   index: number;
+  onAddComment: (entryId: number, comment: Comment) => void;
+  onOpenDetail: (entry: DiaryEntry) => void;
 }
 
-const DiaryCard = ({ entry, index }: DiaryCardProps) => {
+const DiaryCard = ({ entry, index, onAddComment, onOpenDetail }: DiaryCardProps) => {
+  const [newComment, setNewComment] = useState("");
+  const [showComments, setShowComments] = useState(false);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  const handleAddComment = () => {
+    if (newComment.trim()) {
+      onAddComment(entry.id, {
+        author: "You",
+        content: newComment,
+        date: new Date().toISOString()
+      });
+      setNewComment("");
+      
+      // Scroll to bottom after adding comment
+      setTimeout(() => {
+        if (scrollAreaRef.current) {
+          const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+          if (scrollContainer) {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          }
+        }
+      }, 100);
+    }
+  };
+
+  useEffect(() => {
+    if (showComments && scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  }, [showComments]);
 
   return (
     <Card 
       className="overflow-hidden bg-secondary/30 border-0 shadow-card hover:shadow-lg transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Images Gallery */}
+      {/* Images Gallery - Show max 2 images + count */}
       {entry.images.length > 0 && (
-        <div className={`grid ${entry.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-2 p-2`}>
-          {entry.images.map((image, idx) => (
+        <div className="grid grid-cols-2 gap-2 p-2">
+          {entry.images.slice(0, 2).map((image, idx) => (
             <div 
               key={idx} 
-              className={`relative overflow-hidden rounded-2xl ${entry.images.length === 1 ? 'aspect-video' : 'aspect-square'} bg-secondary`}
+              className="relative overflow-hidden rounded-2xl aspect-square bg-secondary cursor-pointer"
+              onClick={() => onOpenDetail(entry)}
             >
-              <img
-                src={image}
-                alt={`Memory ${idx + 1}`}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <img
+                  src={image}
+                  alt={`Memory ${idx + 1}`}
+                  className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              {idx === 1 && entry.images.length > 2 && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <span className="text-white text-3xl font-bold">+{entry.images.length - 2}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -75,30 +122,58 @@ const DiaryCard = ({ entry, index }: DiaryCardProps) => {
 
         {/* Comments Section */}
         {entry.comments.length > 0 && (
-          <div className="border-t border-border pt-4 space-y-3">
-            {entry.comments.map((comment, idx) => (
-              <div key={idx} className="bg-background/50 rounded-xl p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium text-foreground">{comment.author}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(comment.date)}
-                  </span>
+          <div className="border-t border-border pt-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowComments(!showComments)}
+              className="w-full mb-2 text-muted-foreground hover:text-foreground"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              {showComments ? 'Hide' : 'Show'} {entry.comments.length} {entry.comments.length === 1 ? 'comment' : 'comments'}
+              {!showComments && entry.comments.length > 2 && <ChevronDown className="w-4 h-4 ml-2" />}
+            </Button>
+            
+            {showComments && (
+              <ScrollArea ref={scrollAreaRef} className="h-[200px] pr-4">
+                <div className="space-y-3">
+                  {entry.comments.map((comment, idx) => (
+                    <div key={idx} className="bg-background/50 rounded-xl p-3">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-foreground">{comment.author}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(comment.date)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{comment.content}</p>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-sm text-muted-foreground">{comment.content}</p>
-              </div>
-            ))}
+              </ScrollArea>
+            )}
           </div>
         )}
 
-        {/* Action Button */}
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="w-full mt-4 text-primary hover:text-primary hover:bg-primary/10"
-        >
-          <MessageCircle className="w-4 h-4 mr-2" />
-          Add Comment
-        </Button>
+        {/* Add Comment Input */}
+        <div className="border-t border-border pt-4 mt-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+              className="flex-1"
+            />
+            <Button
+              size="icon"
+              onClick={handleAddComment}
+              disabled={!newComment.trim()}
+              className="bg-primary hover:bg-primary/90"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
       </div>
     </Card>
   );

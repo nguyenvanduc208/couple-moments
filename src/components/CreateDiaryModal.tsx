@@ -24,11 +24,11 @@ const CreateDiaryModal = ({ isOpen, onClose, onSubmit }: CreateDiaryModalProps) 
   const [currentImageUrl, setCurrentImageUrl] = useState("");
 
   const handleAddImage = () => {
-    if (currentImageUrl && imageUrls.length < 5) {
+    if (currentImageUrl && imageUrls.length < 10) {
       setImageUrls([...imageUrls, currentImageUrl]);
       setCurrentImageUrl("");
-    } else if (imageUrls.length >= 5) {
-      toast.error("Maximum 5 images allowed");
+    } else if (imageUrls.length >= 10) {
+      toast.error("Maximum 10 images allowed");
     }
   };
 
@@ -103,7 +103,7 @@ const CreateDiaryModal = ({ isOpen, onClose, onSubmit }: CreateDiaryModalProps) 
           {/* Images */}
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">
-              Photos ({imageUrls.length}/5)
+              Photos ({imageUrls.length}/10)
             </label>
             
             {/* Image URL Input */}
@@ -118,7 +118,7 @@ const CreateDiaryModal = ({ isOpen, onClose, onSubmit }: CreateDiaryModalProps) 
               <Button
                 type="button"
                 onClick={handleAddImage}
-                disabled={!currentImageUrl || imageUrls.length >= 5}
+                disabled={!currentImageUrl || imageUrls.length >= 10}
                 size="icon"
                 className="rounded-xl bg-primary hover:bg-primary/90"
               >

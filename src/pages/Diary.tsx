@@ -1,8 +1,12 @@
-import { Plus } from "lucide-react";
+import { Plus, Calendar as CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import DiaryCard from "@/components/DiaryCard";
 import CreateDiaryModal from "@/components/CreateDiaryModal";
+import DiaryDetailDialog from "@/components/DiaryDetailDialog";
 
 // Sample diary entries
 const sampleEntries = [
@@ -49,10 +53,37 @@ const sampleEntries = [
 const Diary = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [entries, setEntries] = useState(sampleEntries);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [detailEntry, setDetailEntry] = useState<any>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
 
   const handleCreateEntry = (newEntry: any) => {
     setEntries([newEntry, ...entries]);
   };
+
+  const handleAddComment = (entryId: number, comment: any) => {
+    setEntries(entries.map(entry => 
+      entry.id === entryId 
+        ? { ...entry, comments: [...entry.comments, comment] }
+        : entry
+    ));
+  };
+
+  const handleOpenDetail = (entry: any) => {
+    setDetailEntry(entry);
+    setIsDetailOpen(true);
+  };
+
+  // Get dates that have diary entries
+  const datesWithEntries = entries.map(entry => new Date(entry.date));
+
+  // Filter entries by selected date
+  const filteredEntries = selectedDate 
+    ? entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate.toDateString() === selectedDate.toDateString();
+      })
+    : entries;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -62,28 +93,82 @@ const Diary = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-1">Our Moments</h1>
             <p className="text-muted-foreground text-sm">
-              {entries.length} {entries.length === 1 ? 'memory' : 'memories'} saved
+              {filteredEntries.length} {filteredEntries.length === 1 ? 'memory' : 'memories'} 
+              {selectedDate && ' on ' + selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            size="lg"
-            className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all"
-          >
-            <Plus className="w-5 h-5" />
-          </Button>
+          <div className="flex gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "rounded-full",
+                    selectedDate && "border-primary text-primary"
+                  )}
+                >
+                  <CalendarIcon className="w-5 h-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  modifiers={{
+                    hasDiary: datesWithEntries
+                  }}
+                  modifiersStyles={{
+                    hasDiary: {
+                      fontWeight: 'bold',
+                      textDecoration: 'underline',
+                      color: 'hsl(var(--primary))'
+                    }
+                  }}
+                  className="pointer-events-auto"
+                />
+                {selectedDate && (
+                  <div className="p-3 border-t">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedDate(undefined)}
+                      className="w-full"
+                    >
+                      Clear filter
+                    </Button>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              size="lg"
+              className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all"
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Diary Entries */}
         <div className="space-y-6">
-          {entries.map((entry, index) => (
-            <DiaryCard key={entry.id} entry={entry} index={index} />
+          {filteredEntries.map((entry, index) => (
+            <DiaryCard 
+              key={entry.id} 
+              entry={entry} 
+              index={index}
+              onAddComment={handleAddComment}
+              onOpenDetail={handleOpenDetail}
+            />
           ))}
         </div>
 
-        {entries.length === 0 && (
+        {filteredEntries.length === 0 && (
           <div className="text-center py-16">
-            <p className="text-muted-foreground mb-4">No memories yet</p>
+            <p className="text-muted-foreground mb-4">
+              {selectedDate ? 'No memories on this date' : 'No memories yet'}
+            </p>
             <Button onClick={() => setIsModalOpen(true)} variant="outline" className="rounded-full">
               Create your first memory
             </Button>
@@ -95,6 +180,13 @@ const Diary = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleCreateEntry}
+      />
+
+      <DiaryDetailDialog
+        entry={detailEntry}
+        isOpen={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        onAddComment={handleAddComment}
       />
     </div>
   );
